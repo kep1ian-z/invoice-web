@@ -1,0 +1,14 @@
+{
+    "permissions": {
+        "allow": [
+            "WebSearch",
+            "WebFetch",
+            "mcp__playwright"
+        ],
+        "deny": [],
+        "ask": []
+    },
+    "enabledMcpjsonServers": [
+        "playwright"
+    ]
+}
