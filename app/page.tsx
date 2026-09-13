@@ -1,38 +1,17 @@
-import Link from "next/link";
-
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 
 export default function Home() {
     return (
         <div className="mx-auto flex max-w-5xl flex-col items-center gap-6 px-4 py-24 text-center">
-            <Badge>Starter Kit</Badge>
+            <Badge>Invoice Web</Badge>
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-                Next.js 웹 스타터킷
+                견적서 웹 뷰어
             </h1>
             <p className="max-w-xl text-balance text-muted-foreground">
-                Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui가 미리
-                구성되어 있습니다. 바로 기능 개발을 시작해보세요.
+                Notion에 입력한 견적서를 클라이언트가 로그인 없이 웹에서
+                열람하고 PDF로 다운로드할 수 있는 전용 페이지를 제공합니다.
+                견적서 상세 페이지는 발급된 링크(slug)로 접근합니다.
             </p>
-            <div className="flex items-center gap-3">
-                <Button size="lg" nativeButton={false} render={<Link href="/demo" />}>
-                    데모 보기
-                </Button>
-                <Button
-                    size="lg"
-                    variant="outline"
-                    nativeButton={false}
-                    render={
-                        <a
-                            href="https://github.com"
-                            target="_blank"
-                            rel="noreferrer"
-                        />
-                    }
-                >
-                    GitHub
-                </Button>
-            </div>
         </div>
     );
 }
