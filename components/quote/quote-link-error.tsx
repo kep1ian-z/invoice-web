@@ -30,7 +30,7 @@ const errorContent = {
 >;
 
 // 잘못되었거나 만료된 링크 접근 시 보여주는 안내 화면.
-// expired 변형은 UI 시안이며 만료 정책이 확정되기 전까지 라우팅에는 연결하지 않는다.
+// 만료 정책은 「열람 허용 + 안내만」으로 확정되어 expired 변형은 현재 라우팅에 연결하지 않는다.
 export function QuoteLinkError({ variant }: QuoteLinkErrorProps) {
     const { icon: Icon, title, description } = errorContent[variant];
 

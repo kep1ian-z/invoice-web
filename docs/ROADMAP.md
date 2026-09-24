@@ -81,27 +81,35 @@ Notion에 입력한 견적서를 클라이언트가 로그인 없이 열람하�
 
 ### Phase 3: 핵심 기능 구현
 
-- **Task 005: Notion 연동 및 데이터 페칭 구현** - 우선순위
-  - Notion API 클라이언트 설정, `.env.example`에 필요한 환경변수 키 추가 (토큰 값은 절대 커밋 금지)
-  - Notion 응답 → `Quote` 매핑 함수(`mapNotionPropertiesToQuote`) 구현 및 「항목」relation 하위 DB 조회
-  - 동기화 방식(실시간 조회 vs 스냅샷) 확정안 반영해 데이터 페칭 로직 구현
-  - Task 003의 더미 데이터를 실제 Notion 데이터로 교체
-  - Playwright MCP로 Notion 연동 데이터 표시 통합 테스트
+- **Task 005: Notion 연동 및 데이터 페칭 구현** ✅ - 완료
+  - Shrimp Task Manager 태스크: `c49dc771-17d4-407d-9680-b5111ea4e564`, `d30e286f-0dea-4711-899e-8772b1e82b86`, `5d584eaa-3a47-43fe-b598-444cc34161f3`
+  - ✅ Notion SDK(`@notionhq/client` v5) 클라이언트 설정(`lib/notion/client.ts`) 및 pino 로거 도입(`lib/logger.ts`). `.env.example`의 기존 키(`NOTION_API_KEY`, `NOTION_DATABASE_ID`) 그대로 사용, 토큰 값 미커밋
+  - ✅ Notion 응답 → `Quote` 매핑(`mapNotionPropertiesToQuote`) 및 「항목」relation 하위 DB 병렬 조회(동시 3개) 구현 (`lib/notion/mapper.ts`). 속성 누락·타입 불일치 시 원인이 드러나는 오류 발생
+  - ✅ 동기화 방식 확정: 실시간 조회 + 60초 캐시(`unstable_cache`, `lib/quotes.ts`의 `getQuoteBySlug`). `cacheComponents` 전환은 후속 과제
+  - ✅ 더미 데이터 조회를 실제 Notion 데이터로 교체하고 Notion 장애 시 오류 화면(`error.tsx`) 추가
+  - ✅ Playwright MCP로 실제 Notion 견적서 표시 확인 (항목 합계와 총 금액 일치)
+  - 미해결: 항목이 25개를 초과하면 Notion 응답이 잘려 오류로 처리됨(페이지네이션 미구현)
 
-- **Task 006: 고유 링크(slug) 발급 및 접근 제어 구현**
-  - 예측 불가능한 slug 발급 로직 구현 (F2, NFR 보안 요구사항)
-  - 존재하지 않거나 만료된 링크 접근 시 오류 페이지로 라우팅 (F5)
-  - 링크 유효기간 설정 및 만료 판단 로직 구현 (F7)
-  - Playwright MCP E2E 테스트: 정상 링크 / 존재하지 않는 링크 / 만료된 링크 시나리오
+- **Task 006: 고유 링크(slug) 발급 및 접근 제어 구현** ✅ - 완료
+  - Shrimp Task Manager 태스크: `3c8f29dc-0bb7-43b3-ba86-b9ec641d943b`, `e9734c5a-5991-44c6-b323-a2c672ff049f`
+  - ✅ slug는 Notion 페이지 ID(32자 hex)를 사용하기로 확정. 형식이 잘못되면 Notion 호출 없이 미존재 처리, 우리 견적서 DB 소속이 아닌 페이지는 노출하지 않음 (F2)
+  - ✅ 존재하지 않거나 게시(승인)되지 않은 링크는 오류 페이지로 라우팅 (F5)
+  - ✅ 만료 정책 확정: 유효기간이 지나도 열람은 허용하고 안내만 표시 (F7). 판정은 `lib/quote-validity.ts`로 통일해 배지와 안내가 같은 기준(한국시간, 당일까지 유효) 사용
+  - ✅ Playwright MCP 검증: 정상 / 거절·대기·존재하지 않는 링크 404 / 만료 안내(라이트·다크·375px)
+  - 참고: 링크 폐기·재발급은 불가능(페이지 ID 고정)
 
-- **Task 006-1: 핵심 기능 통합 테스트**
+- **Task 006-1: 핵심 기능 통합 테스트** ✅ - 완료
+  - Shrimp Task Manager 태스크: `5d7e54be-27d8-443a-8dc8-cf65afea1015`
+  - ✅ Playwright MCP로 링크 접속→열람→PDF 버튼(안내 토스트) 플로우 검증 (PDF 실제 생성은 Task 007)
+  - ✅ Notion 동기화 실패(잘못된 토큰) 시 500 오류 화면과 다시 시도 버튼 검증, 토큰 미노출 확인
+  - ✅ 엣지 케이스(빈 필수 속성, 게시되지 않은 견적서 등): 비승인·존재하지 않는 링크는 실제 Notion으로 검증. 빈 필수 속성·항목 0개는 실제 Notion 데이터가 아닌 가짜 응답으로만 검증
   - Playwright MCP로 "링크 접속 → 견적 열람 → PDF 다운로드" 전체 플로우 E2E 테스트
   - Notion 동기화 실패 시 오류 처리 검증
   - 에러 핸들링 및 엣지 케이스(빈 필수 속성, 게시되지 않은 견적서 등) 테스트
 
 ### Phase 4: 고급 기능 및 최적화
 
-- **Task 007: PDF 다운로드 기능 구현**
+- **Task 007: PDF 다운로드 기능 구현** - 우선순위
   - 구현 방식(서버사이드 렌더링 vs 클라이언트 print-to-PDF) 확정안 반영
   - 파일명 규칙(`견적서_{클라이언트명}_{날짜}.pdf`, 형식 확인 필요) 적용
   - 웹 화면과 PDF 내용·순서·금액 100% 동일성 검증

@@ -1,4 +1,4 @@
-import type { Quote, QuoteStatus } from "@/lib/types/quote";
+import type { QuoteStatus } from "@/lib/types/quote";
 
 // Notion 데이터베이스 원시 속성 타입. 속성 키와 Notion 속성 타입, 「상태」옵션값,
 // 「항목」하위 DB 구조 모두 실제 DB 스키마 조회 결과로 확정되었다.
@@ -41,6 +41,8 @@ interface NotionDateProperty {
 interface NotionRelationProperty {
     type: "relation";
     relation: { id: string }[];
+    /** 페이지 조회 시 relation은 최대 25개까지만 반환되며, 초과 시 true */
+    has_more?: boolean;
 }
 
 export interface NotionQuoteProperties {
@@ -72,13 +74,4 @@ export interface NotionLineItemProperties {
     "금액": NotionFormulaNumberProperty;
 }
 
-// Notion 원시 속성을 내부 Quote 타입으로 변환한다.
-// slug는 Notion 속성이 아니라 게시 시점에 별도로 발급되는 값이므로 인자로 분리했다
-// (docs/PRD.md F2: 예측 불가능한 고유 링크 발급).
-// 구현은 Phase 3 Notion 연동 Task에서 진행하며, 여기서는 타입 시그니처만 정의한다.
-export function mapNotionPropertiesToQuote(
-    slug: string,
-    properties: NotionQuoteProperties
-): Quote {
-    throw new Error("not implemented");
-}
+// 변환 함수(mapNotionPropertiesToQuote)는 lib/notion/mapper.ts에 구현되어 있다.
