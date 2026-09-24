@@ -1,0 +1,25 @@
+- generic [active] [ref=f3e1]:
+  - banner [ref=f3e2]:
+    - generic [ref=f3e3]:
+      - link "견적서 웹 뷰어" [ref=f3e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=f3e5]:
+        - navigation [ref=f3e6]:
+          - list [ref=f3e7]:
+            - listitem [ref=f3e8]:
+              - link "Home" [ref=f3e9] [cursor=pointer]:
+                - /url: /
+        - button "테마 전환" [ref=f3e10]
+  - main [ref=f3e12]:
+    - generic [ref=f3e15]:
+      - generic [ref=f3e21]:
+        - heading "견적서를 찾을 수 없습니다" [level=1] [ref=f3e22]
+        - paragraph [ref=f3e23]: 링크가 올바르지 않거나 존재하지 않는 견적서입니다. 주소를 다시 확인해 주세요.
+      - generic [ref=f3e24]:
+        - generic [ref=f3e28]: "문의:"
+        - generic [ref=f3e29]: 연락처 준비 중
+      - button "홈으로 돌아가기" [ref=f3e30] [cursor=pointer]
+  - contentinfo [ref=f3e31]:
+    - paragraph [ref=f3e33]: © 2026 Invoice Web. All rights reserved.
+  - region "Notifications alt+T"
+  - alert [ref=f3e34]

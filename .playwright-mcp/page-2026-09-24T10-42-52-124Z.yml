@@ -1,0 +1,60 @@
+- generic [active] [ref=f5e1]:
+  - banner [ref=f5e2]:
+    - generic [ref=f5e3]:
+      - link "견적서 웹 뷰어" [ref=f5e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=f5e5]:
+        - navigation [ref=f5e6]:
+          - list [ref=f5e7]:
+            - listitem [ref=f5e8]:
+              - link "Home" [ref=f5e9] [cursor=pointer]:
+                - /url: /
+        - button "테마 전환" [ref=f5e10]
+  - main [ref=f5e12]:
+    - generic [ref=f5e14]:
+      - generic [ref=f5e15]:
+        - generic [ref=f5e16]:
+          - generic [ref=f5e17]:
+            - heading "견적서 Q-2026-005" [level=1] [ref=f5e18]
+            - generic [ref=f5e19]: 승인
+          - paragraph [ref=f5e20]: 미래테크
+          - paragraph [ref=f5e21]: "발행일: 2026년 8월 10일"
+          - generic [ref=f5e22]: 유효기간 경과 · 2026년 9월 9일까지
+        - button "PDF 다운로드" [ref=f5e23]
+      - region [ref=f5e24]:
+        - heading "견적 항목" [level=2] [ref=f5e25]
+        - list "견적 항목 목록" [ref=f5e26]:
+          - listitem [ref=f5e27]:
+            - generic [ref=f5e29]:
+              - paragraph [ref=f5e30]: 시스템 진단 컨설팅
+              - separator [ref=f5e31]
+              - generic [ref=f5e32]:
+                - generic [ref=f5e33]:
+                  - term [ref=f5e34]: 단가
+                  - definition [ref=f5e35]: ₩600,000
+                - generic [ref=f5e36]:
+                  - term [ref=f5e37]: 수량
+                  - definition [ref=f5e38]: "2"
+                - generic [ref=f5e39]:
+                  - term [ref=f5e40]: 금액
+                  - definition [ref=f5e41]: ₩1,200,000
+          - listitem [ref=f5e42]:
+            - generic [ref=f5e44]:
+              - paragraph [ref=f5e45]: 개선안 보고서
+              - separator [ref=f5e46]
+              - generic [ref=f5e47]:
+                - generic [ref=f5e48]:
+                  - term [ref=f5e49]: 단가
+                  - definition [ref=f5e50]: ₩900,000
+                - generic [ref=f5e51]:
+                  - term [ref=f5e52]: 수량
+                  - definition [ref=f5e53]: "1"
+                - generic [ref=f5e54]:
+                  - term [ref=f5e55]: 금액
+                  - definition [ref=f5e56]: ₩900,000
+      - generic [ref=f5e58]:
+        - generic [ref=f5e59]: 총 금액
+        - generic [ref=f5e60]: ₩2,100,000
+  - contentinfo [ref=f5e61]:
+    - paragraph [ref=f5e63]: © 2026 Invoice Web. All rights reserved.
+  - region "Notifications alt+T"

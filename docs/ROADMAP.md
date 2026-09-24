@@ -63,21 +63,25 @@ Notion에 입력한 견적서를 클라이언트가 로그인 없이 열람하�
   - ✅ Notion 응답 → 내부 타입 매핑 함수는 시그니처만 선언 (구현은 Task 005)
   - ✅ 링크 상태 타입(`QuoteLinkStatus`) 정의
 
-### Phase 2: UI/UX 완성 (더미 데이터 활용)
+### Phase 2: UI/UX 완성 (더미 데이터 활용) ✅
 
-- **Task 003: 견적서 전용 컴포넌트 라이브러리 구현** - 우선순위
-  - 견적 항목 표, 합계 요약, 유효기간 배지 등 shadcn 기반 컴포넌트 구현 (`/add-component` 프로세스 준수, `components/ui/*` 기존 컨벤션 유지)
-  - 더미 견적서 데이터 fixture 작성 (`docs/PRD.md` 6장 필드 매핑 기준)
+- **Task 003: 견적서 전용 컴포넌트 라이브러리 구현** ✅ - 완료
+  - Shrimp Task Manager 태스크: `1bcb8d31-e032-4eb2-b1d0-81f3bda07c63`, `0a65c672-263d-4a51-b24b-6e889e120dc1`, `3c058772-ef50-4ace-9961-7b56cc903463`
+  - ✅ shadcn `table` 컴포넌트 추가 (`components/ui/table.tsx`, CLI가 `cn`을 외부 패키지로 잘못 import해 `@/lib/utils`로 수정, 의존성 변경 없음)
+  - ✅ 견적 항목 표(`QuoteLineItemsTable`: 데스크톱 표 / 모바일 카드 스택), 합계 요약(`QuoteTotalSummary`, 금액 없으면 '금액 미정'), 상태 배지, 유효기간 배지(표시 전용) 구현 (`components/quote/*`)
+  - ✅ 더미 견적서 fixture 작성 (`lib/mocks/quotes.ts`: 승인/대기/거절/유효기간 임박/경과/금액 없음 6케이스, `getMockQuoteBySlug` 단일 조회 접점)
+  - ✅ 원화·날짜 포맷 유틸 작성 (`lib/format.ts`)
 
-- **Task 004: 견적서 상세/오류 페이지 UI 완성**
-  - 더미 데이터로 견적서 상세 페이지 전체 UI 구현 (클라이언트명, 항목표, 합계, 유효기간, PDF 다운로드 버튼)
-  - 링크 오류 페이지 UI 구현 (오류 메시지, 문의 연락처 영역)
-  - 모바일/데스크톱 반응형 레이아웃 적용 (F6)
-  - PDF 다운로드 버튼은 UI만 구현 (동작은 더미 핸들러)
+- **Task 004: 견적서 상세/오류 페이지 UI 완성** ✅ - 완료
+  - Shrimp Task Manager 태스크: `16019963-f59c-4148-9559-5a875d9992fa`, `7bd45437-8660-4c9d-8d87-b33b1120c251`, `f62bd505-bbdf-4097-a1c7-7f56dc7967ba`
+  - ✅ 더미 데이터로 견적서 상세 페이지 전체 UI 구현 (헤더, 상태·유효기간 배지, 항목표, 합계, PDF 다운로드 버튼). 승인(`isPublished`)된 견적서만 표시하고 그 외는 `notFound()`
+  - ✅ 링크 오류 페이지 UI 구현 (`QuoteLinkError`: `not_found` 사용 중, `expired`는 UI 시안만 두고 라우팅 미연결). 문의 연락처는 "연락처 준비 중" 플레이스홀더
+  - ✅ 모바일(375px)/데스크톱/다크모드 반응형 레이아웃 적용 및 Playwright 브라우저 검증 (F6)
+  - ✅ PDF 다운로드 버튼은 UI만 구현 (클릭 시 안내 toast, 실제 생성은 Task 007)
 
 ### Phase 3: 핵심 기능 구현
 
-- **Task 005: Notion 연동 및 데이터 페칭 구현**
+- **Task 005: Notion 연동 및 데이터 페칭 구현** - 우선순위
   - Notion API 클라이언트 설정, `.env.example`에 필요한 환경변수 키 추가 (토큰 값은 절대 커밋 금지)
   - Notion 응답 → `Quote` 매핑 함수(`mapNotionPropertiesToQuote`) 구현 및 「항목」relation 하위 DB 조회
   - 동기화 방식(실시간 조회 vs 스냅샷) 확정안 반영해 데이터 페칭 로직 구현

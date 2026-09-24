@@ -1,17 +1,56 @@
-import type { Quote } from "@/lib/types/quote";
+import { notFound } from "next/navigation";
 
+import { QuoteDownloadButton } from "@/components/quote/quote-download-button";
+import { QuoteLineItemsTable } from "@/components/quote/quote-line-items-table";
+import { QuoteStatusBadge } from "@/components/quote/quote-status-badge";
+import { QuoteTotalSummary } from "@/components/quote/quote-total-summary";
+import { QuoteValidityBadge } from "@/components/quote/quote-validity-badge";
+import { formatDate } from "@/lib/format";
+import { getMockQuoteBySlug } from "@/lib/mocks/quotes";
+
+// 견적서 상세 페이지. 승인된(게시된) 견적서만 표시하고 그 외에는 not-found로 보낸다.
 export default async function Page(props: PageProps<"/quotes/[slug]">) {
     const { slug } = await props.params;
 
-    // 실제 Notion 조회는 이후 Phase에서 구현 (지금은 slug만 표시하는 빈 껍데기)
-    const quoteSlug: Quote["slug"] = slug;
+    // 조회 로직은 이 한 줄에 모아둔다 (Phase 3 Task 005에서 Notion 조회로 교체)
+    const quote = getMockQuoteBySlug(slug);
+
+    if (!quote || !quote.isPublished) {
+        notFound();
+    }
+
+    const issuedDate = formatDate(quote.issuedAt);
 
     return (
         <div className="mx-auto max-w-5xl px-4 py-12">
-            <h1 className="text-2xl font-semibold">견적서 상세</h1>
-            <p className="mt-2 text-muted-foreground">
-                요청한 견적서 slug: <span className="font-mono">{quoteSlug}</span>
-            </p>
+            <div className="space-y-8">
+                {/* 헤더: 견적서 번호, 클라이언트명, 발행일, 상태 */}
+                <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="space-y-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <h1 className="text-2xl font-semibold">견적서 {quote.quoteNumber}</h1>
+                            <QuoteStatusBadge status={quote.status} />
+                        </div>
+                        <p className="text-muted-foreground">{quote.clientName}</p>
+                        <p className="text-sm text-muted-foreground">
+                            발행일: {issuedDate ?? "미정"}
+                        </p>
+                        <QuoteValidityBadge validUntil={quote.validUntil} />
+                    </div>
+                    <QuoteDownloadButton />
+                </header>
+
+                {/* 견적 항목 */}
+                <section aria-labelledby="quote-items-heading" className="space-y-3">
+                    <h2 id="quote-items-heading" className="text-lg font-semibold">
+                        견적 항목
+                    </h2>
+                    <QuoteLineItemsTable lineItems={quote.lineItems} />
+                </section>
+
+                {/* 합계 */}
+                <QuoteTotalSummary totalAmount={quote.totalAmount} />
+            </div>
         </div>
     );
 }
