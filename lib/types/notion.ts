@@ -41,6 +41,8 @@ interface NotionDateProperty {
 interface NotionRelationProperty {
     type: "relation";
     relation: { id: string }[];
+    /** 속성 ID. 25개 초과 시 페이지네이션 조회(pages.properties.retrieve)에 사용한다 */
+    id?: string;
     /** 페이지 조회 시 relation은 최대 25개까지만 반환되며, 초과 시 true */
     has_more?: boolean;
 }

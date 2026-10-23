@@ -11,8 +11,10 @@ import type { Quote, QuoteLineItem, QuoteStatus } from "@/lib/types/quote";
 // SDK 응답은 unknown으로 취급하고 타입 가드로 좁혀 lib/types/notion.ts의 원시 타입을 만든다.
 // 스키마 변경(PRD 11장)이 생기면 어떤 속성이 문제인지 오류 메시지에 드러나도록 한다.
 
-// 항목 조회 시 기본 동시 요청 수. Notion 평균 제한(3req/s)에 맞춘다.
-const DEFAULT_LINE_ITEM_CONCURRENCY = 3;
+// 항목 조회 시 기본 동시 요청 수. Notion 평균 제한은 3req/s이지만 순간 요청은 허용되며
+// (동시 25건도 429 없이 약 0.5초에 완료됨을 실측), 429가 나면 SDK가 자동 재시도한다.
+// 3개씩 조회하면 항목 25개에서 약 3초가 걸려 로딩 3초 목표를 넘기므로 10으로 높인다.
+const DEFAULT_LINE_ITEM_CONCURRENCY = 10;
 
 const QUOTE_STATUSES: readonly QuoteStatus[] = ["대기", "거절", "승인"];
 
@@ -243,24 +245,18 @@ function parseStatus(
 }
 
 // relation 속성 파싱. Notion은 페이지 조회 시 relation을 최대 25개까지만 주므로
-// has_more가 true이면 항목이 누락되므로 오류로 처리한다.
+// has_more가 true이면 호출부(fetchQuoteFromPage)가 나머지를 페이지네이션으로 조회한다.
 function parseRelation(
     properties: Record<string, unknown>,
     key: string,
     context: string
-): { type: "relation"; relation: { id: string }[]; has_more?: boolean } {
+): { type: "relation"; relation: { id: string }[]; id?: string; has_more?: boolean } {
     const property = getTypedProperty(properties, key, "relation", context);
 
     if (!Array.isArray(property.relation)) {
         throw createMappingError(
             key,
             `${context}: 속성 "${key}"의 relation 값이 배열이 아닙니다`
-        );
-    }
-    if (property.has_more === true) {
-        throw createMappingError(
-            key,
-            `${context}: 속성 "${key}"의 relation이 25개를 초과해 일부 항목이 잘렸습니다 (페이지네이션 미구현)`
         );
     }
     const relation = property.relation.map((item: unknown) => {
@@ -272,7 +268,12 @@ function parseRelation(
         }
         return { id: item.id };
     });
-    return { type: "relation", relation };
+    return {
+        type: "relation",
+        relation,
+        id: typeof property.id === "string" ? property.id : undefined,
+        has_more: property.has_more === true,
+    };
 }
 
 // 견적서 페이지 응답을 원시 속성 타입으로 좁힌다.
@@ -413,7 +414,7 @@ async function mapWithConcurrency<T, R>(
 }
 
 // 「항목」relation의 페이지 ID들을 병렬 조회해 QuoteLineItem[]으로 변환한다.
-// 레이트리밋(평균 3req/s)을 넘지 않도록 동시 요청 수를 제한하고, relation 순서를 유지한다.
+// 동시 요청 수를 제한(기본 DEFAULT_LINE_ITEM_CONCURRENCY)해 Notion 레이트리밋을 보호하고, relation 순서를 유지한다.
 export async function fetchLineItems(
     notionClient: Client,
     relationIds: readonly string[],
@@ -433,6 +434,45 @@ export async function fetchLineItems(
     });
 }
 
+// relation 속성의 전체 페이지 ID를 페이지네이션으로 조회한다(순서 유지).
+// 페이지 조회 응답은 relation을 25개까지만 주므로 25개 초과 시 이 함수로 나머지를 가져온다.
+export async function fetchAllRelationIds(
+    notionClient: Client,
+    pageId: string,
+    propertyId: string
+): Promise<string[]> {
+    const relationIds: string[] = [];
+    let startCursor: string | undefined;
+
+    do {
+        const response: unknown = await notionClient.pages.properties.retrieve({
+            page_id: pageId,
+            property_id: propertyId,
+            page_size: 100,
+            start_cursor: startCursor,
+        });
+
+        if (!isRecord(response) || !Array.isArray(response.results)) {
+            throw createMappingError("항목", "항목 relation 페이지네이션 응답 형식이 올바르지 않습니다");
+        }
+        for (const result of response.results as unknown[]) {
+            const relation = isRecord(result) ? result.relation : undefined;
+            if (!isRecord(relation) || typeof relation.id !== "string") {
+                throw createMappingError("항목", "항목 relation 페이지네이션 결과에 id가 없습니다");
+            }
+            relationIds.push(relation.id);
+        }
+
+        const nextCursor = response.has_more === true ? response.next_cursor : null;
+        if (response.has_more === true && typeof nextCursor !== "string") {
+            throw createMappingError("항목", "항목 relation 페이지네이션 커서가 없어 목록이 잘릴 수 있습니다");
+        }
+        startCursor = typeof nextCursor === "string" ? nextCursor : undefined;
+    } while (startCursor !== undefined);
+
+    return relationIds;
+}
+
 // 견적서 페이지 응답 하나를 항목 조회까지 포함해 Quote로 변환하는 편의 함수.
 export async function fetchQuoteFromPage(
     notionClient: Client,
@@ -440,7 +480,16 @@ export async function fetchQuoteFromPage(
     page: unknown
 ): Promise<Quote> {
     const properties = parseQuoteProperties(page);
-    const relationIds = properties["항목"].relation.map((item) => item.id);
+    const itemsProperty = properties["항목"];
+    let relationIds = itemsProperty.relation.map((item) => item.id);
+
+    // 항목이 25개를 넘으면 페이지 응답이 잘려 있으므로 전체 목록을 다시 조회한다
+    if (itemsProperty.has_more) {
+        if (!itemsProperty.id) {
+            throw createMappingError("항목", "항목 relation이 잘렸지만 속성 ID가 없어 전체 조회를 할 수 없습니다");
+        }
+        relationIds = await fetchAllRelationIds(notionClient, slug, itemsProperty.id);
+    }
     const lineItems = await fetchLineItems(notionClient, relationIds);
     return mapNotionPropertiesToQuote(slug, properties, lineItems);
 }
