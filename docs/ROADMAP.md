@@ -107,7 +107,7 @@ Notion에 입력한 견적서를 클라이언트가 로그인 없이 열람하�
   - Notion 동기화 실패 시 오류 처리 검증
   - 에러 핸들링 및 엣지 케이스(빈 필수 속성, 게시되지 않은 견적서 등) 테스트
 
-### Phase 4: 고급 기능 및 최적화
+### Phase 4: 고급 기능 및 최적화 ✅
 
 - **Task 007: PDF 다운로드 기능 구현** ✅ - 완료
   - Shrimp Task Manager 태스크: `4440c51a-cfb1-4f9d-abf1-9f7a2ec241e8`, `82809a73-e631-4e18-9b51-99fcc0bc0f78`, `3bf92c3c-70df-48f2-904b-dd4abcb158fb`
@@ -116,12 +116,15 @@ Notion에 입력한 견적서를 클라이언트가 로그인 없이 열람하�
   - ✅ 승인(게시) 판정을 `lib/quote-access.ts`로 공유해 비승인·미존재·형식 오류 슬러그의 PDF는 404
   - ✅ 다운로드 버튼 연결 (로딩 표시, 실패 시 오류 토스트)
   - ✅ 실제 Notion 승인 견적서 3건으로 웹과 PDF의 내용·순서·금액 일치 검증, Notion 장애 시 500 및 토큰 미노출 확인 (`tasks/007-pdf-download.md`)
-  - 미검증: Vercel 실제 배포 환경에서의 Chromium 실행(번들 크기·타임아웃)은 Task 008에서 확인
+  - ✅ Vercel 배포본 검증은 Task 008에서 완료 (Chromium 바이너리 누락과 한글 폰트 문제를 해결)
 
-- **Task 008: 조회 이력 로깅 및 성능·배포 최적화**
-  - Shrimp Task Manager 태스크: `5122db05-e526-4626-b77b-fbc7192cb16d`, `444f19de-5a3e-4191-a8b1-d9c2363bbb40`
+- **Task 008: 조회 이력 로깅 및 성능·배포 최적화** ✅ - 완료
+  - Shrimp Task Manager 태스크: `5122db05-e526-4626-b77b-fbc7192cb16d`, `444f19de-5a3e-4191-a8b1-d9c2363bbb40`, `6d5127fe-146e-4606-a8e7-0c0f35a0297f`
   - ✅ 견적서 열람 이력 단순 로그 구현 (F8): 열람 일시와 slug만 pino로 기록(IP/기기 미수집), 응답 이후 `after()`로 기록하며 PDF 내부 렌더링·비승인/미존재 링크는 제외 (`lib/view-log.ts`)
   - ✅ 최초 로딩 3초 이내 성능 확인 (NFR): 로컬 기준 캐시 미스 서버 응답 0.6~1.9초, 캐시 히트 0.02~0.05초, 브라우저 load 약 0.1초. Notion 항목 조회 동시성을 3→10으로 높여 항목 25개에서도 3초 이내가 되도록 함
   - ✅ 항목 25개 초과 페이지네이션 구현 (`fetchAllRelationIds`, `lib/notion/mapper.ts`): 가짜 응답으로 60개·커서 순회·오류 경로 검증, 실제 Notion 응답 형태 확인
-  - 배포 환경 확정안 반영한 배포 파이프라인 구성
-  - 로깅 라이브러리 도입 여부 확인 후 `console.log` 대체 (사용자 전역 코딩 규칙 준수)
+  - ✅ Vercel 배포 및 배포본 검증 (`https://invoice-web-lyart-eight.vercel.app`): 정상 열람·404 처리·PDF 다운로드 확인, 페이지 응답 총 0.5~0.8초, PDF 첫 요청 약 7초(이후 약 3초)
+  - ✅ PDF 500 해결: `@sparticuz/chromium/bin`이 배포 함수에 빠지던 문제를 `outputFileTracingIncludes`로 해결 (`next.config.ts`)
+  - ✅ PDF 한글 빈칸 해결: Vercel 서버에 한글 폰트가 없어 Noto Sans KR 웹폰트 추가 (`app/layout.tsx`)
+  - ✅ 로깅은 기존 pino 로거(`lib/logger.ts`)를 사용하고 `console.log`는 쓰지 않음. `.env.example` 갱신(`LOG_LEVEL`, `PDF_BROWSER_PATH`), 시크릿은 저장소에 없음
+  - 참고: 프리뷰·배포별 URL(Deployment Protection)에서는 PDF에 로그인 화면이 찍히므로 클라이언트에는 프로덕션 도메인 링크만 공유 (`tasks/008-logging-performance-deploy.md`)
