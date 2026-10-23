@@ -12,7 +12,7 @@ const navItems = [{ href: "/", label: "Home" }];
 
 export function SiteHeader() {
     return (
-        <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur">
+        <header className="sticky top-0 z-40 border-b print:hidden bg-background/80 backdrop-blur">
             <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
                 <Link href="/" className="font-semibold">
                     견적서 웹 뷰어

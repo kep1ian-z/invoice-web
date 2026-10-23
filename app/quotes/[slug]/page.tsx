@@ -8,16 +8,16 @@ import { QuoteTotalSummary } from "@/components/quote/quote-total-summary";
 import { QuoteValidityBadge } from "@/components/quote/quote-validity-badge";
 import { formatDate } from "@/lib/format";
 import { getQuoteValidityState } from "@/lib/quote-validity";
-import { getQuoteBySlug } from "@/lib/quotes";
+import { getPublishedQuote } from "@/lib/quote-access";
 
 // 견적서 상세 페이지. 승인된(게시된) 견적서만 표시하고 그 외에는 not-found로 보낸다.
 export default async function Page(props: PageProps<"/quotes/[slug]">) {
     const { slug } = await props.params;
 
-    // 조회 로직은 이 한 줄에 모아둔다 (slug는 Notion 페이지 ID, 60초 캐시)
-    const quote = await getQuoteBySlug(slug);
+    // 조회·게시 판정은 PDF 라우트와 공유하는 헬퍼에 모아둔다 (slug는 Notion 페이지 ID, 60초 캐시)
+    const quote = await getPublishedQuote(slug);
 
-    if (!quote || !quote.isPublished) {
+    if (!quote) {
         notFound();
     }
 

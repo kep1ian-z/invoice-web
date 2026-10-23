@@ -29,7 +29,7 @@ export function QuoteLineItemsTable({ lineItems }: QuoteLineItemsTableProps) {
     return (
         <>
             {/* 데스크톱: 표 */}
-            <div className="hidden md:block">
+            <div className="hidden md:block print:block">
                 <Table>
                     <TableCaption className="sr-only">견적 항목 목록</TableCaption>
                     <TableHeader>
@@ -62,7 +62,7 @@ export function QuoteLineItemsTable({ lineItems }: QuoteLineItemsTableProps) {
             </div>
 
             {/* 모바일: 카드형 스택 */}
-            <ul className="space-y-3 md:hidden" aria-label="견적 항목 목록">
+            <ul className="space-y-3 md:hidden print:hidden" aria-label="견적 항목 목록">
                 {lineItems.map((item) => (
                     <li key={item.itemName}>
                         <Card size="sm">

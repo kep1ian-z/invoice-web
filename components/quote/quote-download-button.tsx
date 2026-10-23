@@ -13,7 +13,7 @@ export function QuoteDownloadButton() {
     };
 
     return (
-        <Button type="button" onClick={handleClick}>
+        <Button type="button" onClick={handleClick} className="print:hidden">
             <DownloadIcon data-icon="inline-start" aria-hidden="true" />
             PDF 다운로드
         </Button>
