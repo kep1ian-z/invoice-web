@@ -44,7 +44,7 @@ export default async function Page(props: PageProps<"/quotes/[slug]">) {
                         </p>
                         <QuoteValidityBadge validUntil={quote.validUntil} />
                     </div>
-                    <QuoteDownloadButton />
+                    <QuoteDownloadButton slug={slug} />
                 </header>
 
                 {/* 견적 항목 */}
