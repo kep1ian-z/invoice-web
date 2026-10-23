@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
 
 import { ThemeProvider } from "@/components/theme-provider";
@@ -11,6 +11,14 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 const geistSans = Geist({
     variable: "--font-geist-sans",
     subsets: ["latin"],
+});
+
+// 한글 웹폰트. 서버(Vercel)에는 한글 폰트가 없어 PDF에서 한글이 비어 보이므로 직접 호스팅한다.
+// globals.css의 font-sans가 이 변수(--font-sans)를 사용한다.
+const notoSansKr = Noto_Sans_KR({
+    variable: "--font-sans",
+    subsets: ["latin"],
+    display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -27,7 +35,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     return (
         <html
             lang="ko"
-            className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+            className={`${geistSans.variable} ${geistMono.variable} ${notoSansKr.variable} h-full antialiased`}
             suppressHydrationWarning
         >
             <body className="min-h-full flex flex-col">
